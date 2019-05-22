@@ -37,7 +37,7 @@
   copy:
     src: "{{ app_package_temp }}/{{ app_dist_filename }}"
     dest: "{{ app_package_dest }}/{{ app_dist_filename }}"
-    owner: "{{ app_owner['name'] }}"
+    owner: "{{ app_owner }}"
     mode: "{{ app_package_dest_mode }}"
     group: "{{ app_group }}"
     force: "{{ app_package_replace }}"
