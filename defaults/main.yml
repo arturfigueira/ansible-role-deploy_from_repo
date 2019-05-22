@@ -1,0 +1,46 @@
+app_name: 'MY_APP'
+app_version: '1.0.0'
+app_dist_extension: 'jar'
+app_dist_separator: "-"
+app_dist_filename: "{{ app_name }}{{app_dist_separator}}{{ app_version }}.{{ app_dist_extension }}"
+
+#Setfrom  which respository we are downloading our dist file.
+#available options: artifactory, local
+#future impl: github
+# artifactory: JFrog Artifactory
+# local: Get file from a local directory / mounted folder
+app_respository: artifactory
+
+#ARTIFACTORY - DEFAULT VARS
+artifactory_url: ''
+artifactory_dist_url: '{{ artifactory_url }}/{{ app_name }}/{{ app_version }}'
+artifactory_apikey: ''
+artifactory_check_certs: no
+artifactory_checksum_algth: 'sha1'
+
+#LOCAL - DEFAULT VARS
+local_path_mount: ''
+local_package_path: ''
+local_package_checksum_algth: 'sha1'
+local_package_checksum: "{{ lookup('file', '.'.join(('/'.join((local_package_path, app_dist_filename)),local_package_checksum_algth))) }}"
+
+#temporary directory where we will place the downloaded file from repo
+app_package_temp: /tmp
+
+#Unpack the package before deploying it
+app_unpack_package: false
+
+#remove package files at the end, when UNPACK is true
+app_package_cleanup: true
+
+#where the package will be deployed
+app_package_dest: '/opt/{{ app_name }}'
+
+#If YES it will overrite if the file already exists. options: yes, no
+app_package_replace: yes
+app_package_dest_mode: 755
+
+
+#Owner Settings
+app_owner: 'root'
+app_group: 'root'

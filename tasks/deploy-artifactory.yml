@@ -1,0 +1,22 @@
+---
+- name: Deploy from Artifactory | get checksum file
+  get_url:
+    url: "{{ artifactory_dist_url }}/{{ app_dist_filename }}.{{ artifactory_checksum_algth }}"
+    dest: "{{ app_package_temp }}"
+    validate_certs: "{{ artifactory_check_certs }}"
+    headers:
+      X-JFrog-Art-Api:{{ artifactory_apikey }}
+
+  #checksum from file, locate remotly isnt working as we expected.
+  #more about it here: https://github.com/ansible/ansible/issues/48790#issuecomment-440432038
+- name: Deploy from Artifactory | get package
+  get_url:
+    url: "{{ artifactory_dist_url }}/{{ app_dist_filename }}"
+    headers:
+      X-JFrog-Art-Api:{{ artifactory_apikey }}
+    dest: "{{ app_package_temp }}"
+    validate_certs: "{{ artifactory_check_certs }}"
+    checksum: "{{ artifactory_checksum_algth }}:{{ lookup('file', '.'.join(('/'.join((app_package_temp, app_dist_filename)),artifactory_checksum_algth))) }}"
+
+- name: Deploy from Artifactory | remove checksum file
+  file: name="{{ app_package_temp }}/{{ app_dist_filename }}.{{ artifactory_checksum_algth }}" state=absent

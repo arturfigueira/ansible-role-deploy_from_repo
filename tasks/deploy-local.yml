@@ -1,0 +1,18 @@
+---
+- name: Deploy from Local | Mount Source
+  mount:
+    src: "{{ local_path_mount }}"
+    path: "{{ local_package_path }}"
+    state: mounted
+  when: local_path_mount | length > 0
+
+- name: Deploy from Local | Copy Dist File
+  copy:
+    src: "{{ local_package_path }}/{{ app_dist_filename }}"
+    dest: "{{ app_package_temp }}/{{ app_dist_filename }}"
+    force: "{{ app_package_replace }}"
+    checksum: "{{ local_package_checksum }}"
+
+  - name: Deploy from Local | Unmount Source
+    mount: src="{{ local_path_mount }}" state=mounted
+    when: local_path_mount | length > 0

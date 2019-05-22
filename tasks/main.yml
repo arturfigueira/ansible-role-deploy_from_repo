@@ -1,0 +1,48 @@
+---
+- name: Install required packages
+  yum: name={{ item }} state=present
+  with_items:
+    - libselinux-python
+
+- name: Ensure Group is created
+  group: name="{{ app_group }}" state=present
+
+- name: Ensure User is created
+  user: name="{{app_owner}}" state=present
+
+- name: Ensure deploy directory exists
+  file: dest="{{ app_package_dest }}" state=directory
+
+#repository specific tasks
+- include_tasks: "deploy-{{ app_respository }}.yml"
+
+- block:
+    - name: Unpack | Download Required packages
+      yum: name=unzip state=present
+
+    - name: Unpack | Unpack Package
+      unarchive:
+        src: "{{ app_package_temp }}/{{ app_dist_filename }}"
+        dest: "{{ app_package_dest }}"
+        owner: "{{ app_owner }}"
+        mode: "{{ app_package_dest_mode }}"
+        group: "{{ app_group }}"
+
+    - name: Unpack | Cleanup
+      file: state=absent path="{{ app_package_dest }}/{{ app_dist_filename }}"
+      when: app_package_cleanup
+  when: app_unpack_package
+
+- name: Keep package | Copy and Set package owner and mode
+  copy:
+    src: "{{ app_package_temp }}/{{ app_dist_filename }}"
+    dest: "{{ app_package_dest }}/{{ app_dist_filename }}"
+    owner: "{{ app_owner['name'] }}"
+    mode: "{{ app_package_dest_mode }}"
+    group: "{{ app_group }}"
+    force: "{{ app_package_replace }}"
+  when: not app_unpack_package
+
+- name: Keep package | Cleanup
+  file: state=absent path="{{ app_package_temp }}/{{ app_dist_filename }}"
+  when: app_package_cleanup
